@@ -5,7 +5,7 @@ pub struct Converter;
 
 impl Converter {
   pub fn run(hocon_string: String, yaml: bool) -> Result<String, Error> {
-    let hocon = dbg!(HoconLoader::new().load_str(&hocon_string)?.hocon()?);
+    let hocon = HoconLoader::new().load_str(&hocon_string)?.hocon()?;
     let json: Option<Value> = Converter::hocon_to_json(hocon);
 
     let output = if yaml {
