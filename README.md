@@ -8,7 +8,11 @@ Tool to convert `HOCON` into valid `JSON` or `YAML` written in `Rust`.
 
 Either provide the hocon as first argument:
 
-`hoconvert "foo = bar"` which leads to the following output:
+`hoconvert "foo = bar"` 
+
+or provide it from `stdin`, 
+
+`echo "foo = bar" | hoconvert` which leads to the following output:
 
 ```json
 {
@@ -16,6 +20,6 @@ Either provide the hocon as first argument:
 }
 ```
 
-or provide it from `stdin`, e.g. a real-life problem:
+Example of a real-life problem:
 
-`kubectl get cm <any ConfigMap> -o jsonpath='{.data.myHocon} | hoconvert`
+`kubectl get cm <any ConfigMap> -o jsonpath='{.data.myHocon} | jq -r | hoconvert`
