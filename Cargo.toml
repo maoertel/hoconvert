@@ -1,15 +1,24 @@
 [package]
 name = "hoconvert"
 version = "0.1.1"
+authors = ["Mathias Oertel <mathias.oertel@pm.me>"]
 edition = "2021"
+description = "CLI tool to convert HOCON into valid JSON or YAML."
+readme = "README.md"
+keywords = ["cli", "hocon", "json", "yaml", "converter"]
+categories = ["command-line-utilities"]
+license = "MIT"
+repository = "https://github.com/maoertel/hoconvert"
 
 [dependencies]
-clap = { version = "3.0.0-beta.5", features = ["yaml", "suggestions"] }
+clap = "3.0.0-beta.5"
 clap_generate = "3.0.0-beta.5"
 
+hocon = "0.5"
+
 serde = { version = "1", features = ["derive"] }
-serde_json = "1.0.68"
-serde_yaml = "0.8.21"
-hocon = "0.5.2"
-predicates = "2.0.3"
-assert_cmd = "2.0.2"
+serde_json = "1.0"
+serde_yaml = "0.8"
+
+predicates = "2.0"
+assert_cmd = "2.0"
