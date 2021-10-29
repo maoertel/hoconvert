@@ -1,23 +1,32 @@
-# hoconvert
+# {hocon:vert}
 
 CLI Tool to convert `HOCON` into valid `JSON` or `YAML`.
 
 Under normal circumstances this is mostly not needed because hocon configs are parsed 
-within the application – case closed. But in conjunction with Kubernetes where `.conf` 
-files can reside in `ConfigMaps` there was that need to extract information on command 
-line from time to time. And what would be more comfortable than to use `jq` for this.   
+within the application – case closed. But for example in conjunction with Kubernetes 
+where `.conf` files can reside in `ConfigMaps` there was that need to extract information 
+on command line from time to time. And what would be more comfortable than to use `jq` 
+for this.   
 
 ## Usage
 
-`hoconvert [input] [--yaml]`
+```bash 
+hoconvert [input] [--yaml]
+```
 
 Either provide the hocon as first argument:
 
-`hoconvert "foo = bar"` 
+```bash 
+hoconvert "foo = bar"
+```
 
 or provide it from `stdin`, 
 
-`echo "foo = bar" | hoconvert` which leads to the following output:
+```bash
+echo "foo = bar" | hoconvert
+``` 
+
+which leads to the following output:
 
 ```json
 {
@@ -27,4 +36,22 @@ or provide it from `stdin`,
 
 Here is an example of a real-life Kubernetes problem as stated above:
 
-`kubectl get cm <any ConfigMap> -o jsonpath='{.data.myHocon}' | jq -r | hoconvert | jq '.doWhatEverYouWant'`
+```bash
+kubectl get cm <any ConfigMap> -o jsonpath='{.data.myHocon}' | jq -r | hoconvert | jq '.doWhatEverYouWant'
+```
+
+## Installation
+
+### With cargo
+
+In case you have `cargo` installed this is the easiest way to install `hoconvert`  from 
+[crates.io](https://crates.io/crates/hoconvert) in match to your underlying architecture:
+
+```bash
+cargo install hoconvert
+```
+
+### Download the binary
+
+You can download a binary of the [latest release](https://github.com/maoertel/hoconvert/releases) 
+currently for `macOS amd64` and `linux amd64`.
