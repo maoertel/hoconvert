@@ -8,7 +8,7 @@ mod converter;
 
 /// Converts a hocon into JSON (default) or YAML ('--yaml').
 #[derive(Parser)]
-#[clap(version = "0.1.1", author = "Mathias Oertel <mathias.oertel@pm.me>")]
+#[clap(version = "0.1.2", author = "Mathias Oertel <mathias.oertel@pm.me>")]
 struct Opts {
   /// Has to be a valid HOCON. Provided either as first argument or from stdin.
   hocon: Option<String>,
