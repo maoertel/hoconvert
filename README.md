@@ -55,3 +55,14 @@ cargo install hoconvert
 
 You can download a binary of the [latest release](https://github.com/maoertel/hoconvert/releases) 
 currently for `macOS amd64` and `linux amd64`.
+
+### Install with homebrew
+
+In case you have `brew` installed you can install it from there as follows:
+
+```bash
+brew tap maoertel/tap
+brew install hoconvert
+```
+
+Currently, you can install from `brew` for the following architectures: `macOS/amd64` or `linux/amd64`.
