@@ -42,27 +42,34 @@ kubectl get cm <any ConfigMap> -o jsonpath='{.data.myHocon}' | jq -r | hoconvert
 
 ## Installation
 
-### With cargo
-
-In case you have `cargo` installed this is the easiest way to install `hoconvert`  from 
-[crates.io](https://crates.io/crates/hoconvert) in match to your underlying architecture:
-
-```bash
-cargo install hoconvert
-```
-
-### Download the binary
-
-You can download a binary of the [latest release](https://github.com/maoertel/hoconvert/releases) 
-currently for `macOS amd64` and `linux amd64`.
-
 ### Install with homebrew
 
-In case you have `brew` installed you can install it from there as follows:
+In case you use `brew` you can install `hoconvert` as follows:
 
 ```bash
 brew tap maoertel/tap
 brew install hoconvert
 ```
 
-Currently, you can install from `brew` for the following architectures: `macOS/amd64` or `linux/amd64`.
+You can install from `brew` for the following architectures: `macOS/amd64`, `macOS/arm64` or `linux/amd64`.
+
+### Download the binary
+
+You can download a binary of the [latest release](https://github.com/maoertel/hoconvert/releases)
+currently for `macOS/amd64`, `macOS/arm64` and `linux/amd64`.
+
+### Install with cargo
+
+In case you have `cargo` installed this is the easiest way to install `hoconvert` from 
+[crates.io](https://crates.io/crates/hoconvert) in match to your underlying architecture:
+
+```bash
+cargo install hoconvert
+```
+
+### Build it yourself
+
+Check this repo out, change into the project directory and run:
+```bash
+cargo build --release
+```
