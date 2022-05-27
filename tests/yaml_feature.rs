@@ -82,7 +82,7 @@ fn given_a_malformed_hocon_when_convert_then_error() {
   let command = cmd.arg("{ foo = { nested = { key = bar ").arg("--yaml").assert();
 
   let assert = command.failure();
-  assert.stderr(predicate::str::contains("Error: Parse"));
+  assert.stderr(predicate::str::contains("Error: Hocon(Parse)"));
 }
 
 #[test]
@@ -91,5 +91,5 @@ fn given_a_key_without_value_when_convert_then_error() {
   let command = cmd.arg("{ foo = }").arg("--yaml").assert();
 
   let assert = command.failure();
-  assert.stderr(predicate::str::contains("Error: Parse"));
+  assert.stderr(predicate::str::contains("Error: Hocon(Parse)"));
 }
