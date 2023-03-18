@@ -6,8 +6,17 @@ use crate::error::Error;
 pub struct Converter;
 
 impl Converter {
-  pub fn run(hocon_string: &str, yaml: bool) -> Result<String, Error> {
+  pub fn process_string(hocon_string: &str, yaml: bool) -> Result<String, Error> {
     let hocon = HoconLoader::new().load_str(hocon_string)?.hocon()?;
+    Converter::run(hocon, yaml)
+  }
+
+  pub fn process_file(path: &str, yaml: bool) -> Result<String, Error> {
+    let hocon = HoconLoader::new().load_file(path)?.hocon()?;
+    Converter::run(hocon, yaml)
+  }
+
+  fn run(hocon: Hocon, yaml: bool) -> Result<String, Error> {
     let json = Converter::hocon_to_raw_json(hocon)?;
 
     let output = if yaml {

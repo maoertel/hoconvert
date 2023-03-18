@@ -13,7 +13,11 @@ mod error;
 #[clap(version = "0.1.3", author = "Mathias Oertel <mathias.oertel@pm.me>")]
 struct Opts {
   /// Has to be a valid HOCON. Provided either as first argument or from stdin.
+  #[clap(conflicts_with = "file")]
   hocon: Option<String>,
+  /// HOCON file to process.
+  #[clap(long, short, conflicts_with = "hocon")]
+  file: Option<String>,
   /// Optional flag. If you want the output to be YAML.
   #[clap(long, short)]
   yaml: bool,
@@ -22,14 +26,15 @@ struct Opts {
 fn main() -> Result<(), Error> {
   let opts: Opts = Opts::parse();
 
-  let input = match opts.hocon {
-    Some(input) => input,
-    None => {
+  let result = match (opts.hocon, opts.file) {
+    (Some(hocon), _) => Converter::process_string(&hocon, opts.yaml),
+    (_, Some(file)) => Converter::process_file(&file, opts.yaml),
+    (None, None) => {
       let mut input_buffer = String::new();
       std::io::stdin().read_to_string(&mut input_buffer)?;
-      input_buffer
+      Converter::process_string(&input_buffer, opts.yaml)
     }
   };
 
-  Converter::run(&input, opts.yaml).map(|output| println!("{}", output))
+  result.map(|output| println!("{}", output))
 }
