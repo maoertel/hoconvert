@@ -10,8 +10,8 @@ for this.
 
 ## Usage
 
-```bash 
-hoconvert [input] [--yaml]
+```bash
+hoconvert [input | --file <path>] [--yaml]
 ```
 
 Either provide the hocon as first argument:
@@ -32,6 +32,12 @@ which leads to the following output:
 {
   "foo": "bar"
 }
+```
+
+You can also read the hocon from file:
+
+```bash
+hoconvert --file config.hocon
 ```
 
 Here is an example of a real-life Kubernetes problem as stated above:
