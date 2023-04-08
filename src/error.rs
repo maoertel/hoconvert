@@ -1,6 +1,8 @@
 use std::fmt;
 use std::fmt::{Debug, Formatter};
 
+pub type Result<T> = std::result::Result<T, Error>;
+
 #[derive(Debug)]
 pub enum Error {
   Hocon(hocon::Error),
