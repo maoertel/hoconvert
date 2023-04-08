@@ -22,9 +22,11 @@ struct Cli {
   /// Has to be a valid HOCON representation. Provided either as first argument or from stdin.
   #[clap(conflicts_with = "file")]
   string: Option<String>,
+
   /// File path to load the hocon for.
   #[clap(long, short, conflicts_with = "string")]
   file: Option<String>,
+
   /// Option to speciy the output format.
   #[clap(value_enum)]
   #[clap(long, short, default_value = "json")]
@@ -44,5 +46,5 @@ fn main() -> Result<(), Error> {
     }
   };
 
-  result.map(|output| println!("{}", output))
+  result.map(|output| println!("{output}"))
 }
