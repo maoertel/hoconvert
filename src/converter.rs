@@ -1,28 +1,27 @@
 use hocon::{Hocon, HoconLoader};
 use serde_json::{Map, Number, Value};
 
-use crate::error::Error;
+use crate::{error::Error, Output};
 
 pub struct Converter;
 
 impl Converter {
-  pub fn process_string(hocon_string: &str, yaml: bool) -> Result<String, Error> {
+  pub(crate) fn process_string(hocon_string: &str, output: Output) -> Result<String, Error> {
     let hocon = HoconLoader::new().load_str(hocon_string)?.hocon()?;
-    Converter::run(hocon, yaml)
+    Converter::run(hocon, output)
   }
 
-  pub fn process_file(path: &str, yaml: bool) -> Result<String, Error> {
+  pub(crate) fn process_file(path: &str, output: Output) -> Result<String, Error> {
     let hocon = HoconLoader::new().load_file(path)?.hocon()?;
-    Converter::run(hocon, yaml)
+    Converter::run(hocon, output)
   }
 
-  fn run(hocon: Hocon, yaml: bool) -> Result<String, Error> {
+  fn run(hocon: Hocon, output: Output) -> Result<String, Error> {
     let json = Converter::hocon_to_raw_json(hocon)?;
 
-    let output = if yaml {
-      serde_yaml::to_string(&json)?
-    } else {
-      serde_json::to_string_pretty(&json)?
+    let output = match output {
+      Output::Yaml => serde_yaml::to_string(&json)?,
+      Output::Json => serde_json::to_string_pretty(&json)?,
     };
 
     Ok(output)

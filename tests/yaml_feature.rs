@@ -8,7 +8,7 @@ use serde_yaml::Value;
 fn given_empty_hocon_when_convert_then_empty_yaml() {
   let mut cmd = Command::cargo_bin("hoconvert").unwrap();
 
-  let assert = cmd.arg("{}").arg("--yaml").assert();
+  let assert = cmd.arg("{}").arg("--output").arg("yaml").assert();
 
   let assert = assert.success();
   assert.stdout(predicate::str::contains("{}"));
@@ -18,7 +18,7 @@ fn given_empty_hocon_when_convert_then_empty_yaml() {
 fn given_empty_string_when_convert_then_empty_yaml() {
   let mut cmd = Command::cargo_bin("hoconvert").unwrap();
 
-  let assert = cmd.arg("").arg("--yaml").assert();
+  let assert = cmd.arg("").arg("--output").arg("yaml").assert();
 
   let assert = assert.success();
   assert.stdout(predicate::str::contains("{}"));
@@ -27,7 +27,7 @@ fn given_empty_string_when_convert_then_empty_yaml() {
 #[test]
 fn given_simple_key_value_when_convert_then_simple_yaml_object() {
   let mut cmd = Command::cargo_bin("hoconvert").unwrap();
-  let command = cmd.arg("foo = bar").arg("--yaml").assert();
+  let command = cmd.arg("foo = bar").arg("--output").arg("yaml").assert();
 
   let expected_yaml = r#"foo: "bar""#;
   let expected_yaml: Value = serde_yaml::from_str(expected_yaml).unwrap();
@@ -60,7 +60,11 @@ fn given_a_hocon_object_when_convert_then_reflected_in_yaml_object() {
 #[test]
 fn given_a_nested_hocon_object_when_convert_then_reflected_in_yaml_object() {
   let mut cmd = Command::cargo_bin("hoconvert").unwrap();
-  let command = cmd.arg("{ foo = { nested = { key = bar } } }").arg("--yaml").assert();
+  let command = cmd
+    .arg("{ foo = { nested = { key = bar } } }")
+    .arg("--output")
+    .arg("yaml")
+    .assert();
 
   let test_yaml = r#"
         foo:
@@ -79,7 +83,11 @@ fn given_a_nested_hocon_object_when_convert_then_reflected_in_yaml_object() {
 #[test]
 fn given_a_malformed_hocon_when_convert_then_error() {
   let mut cmd = Command::cargo_bin("hoconvert").unwrap();
-  let command = cmd.arg("{ foo = { nested = { key = bar ").arg("--yaml").assert();
+  let command = cmd
+    .arg("{ foo = { nested = { key = bar ")
+    .arg("--output")
+    .arg("yaml")
+    .assert();
 
   let assert = command.failure();
   assert.stderr(predicate::str::contains("Error: Hocon(Parse)"));
@@ -88,7 +96,7 @@ fn given_a_malformed_hocon_when_convert_then_error() {
 #[test]
 fn given_a_key_without_value_when_convert_then_error() {
   let mut cmd = Command::cargo_bin("hoconvert").unwrap();
-  let command = cmd.arg("{ foo = }").arg("--yaml").assert();
+  let command = cmd.arg("{ foo = }").arg("--output").arg("yaml").assert();
 
   let assert = command.failure();
   assert.stderr(predicate::str::contains("Error: Hocon(Parse)"));
