@@ -11,15 +11,14 @@ license = "MIT"
 repository = "https://github.com/maoertel/hoconvert"
 
 [dependencies]
-clap = { version = "3.1.18", features = ["derive"] }
-clap_generate = "3.0.3"
+clap = { version = "4.2.1", features = ["derive"] }
 
 hocon = "0.9.0"
 
-serde = { version = "1.0.137", features = ["derive"] }
-serde_json = "1.0.81"
-serde_yaml = "0.8.24"
+serde = { version = "1.0.159", features = ["derive"] }
+serde_json = "1.0.95"
+serde_yaml = "0.9.21"
 
 [dev-dependencies]
-predicates = "2.1.1"
-assert_cmd = "2.0.4"
+predicates = "3.0.2"
+assert_cmd = "2.0.10"
