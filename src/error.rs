@@ -1,12 +1,15 @@
 use std::fmt;
 use std::fmt::{Debug, Formatter};
 
+pub type Result<T> = std::result::Result<T, Error>;
+
 #[derive(Debug)]
 pub enum Error {
   Hocon(hocon::Error),
   Json(serde_json::Error),
   Yaml(serde_yaml::Error),
   IO(std::io::Error),
+  PathNotFound(String),
 }
 
 impl std::error::Error for Error {}
@@ -18,6 +21,7 @@ impl fmt::Display for Error {
       Error::Json(e) => std::fmt::Display::fmt(e, f),
       Error::Yaml(e) => std::fmt::Display::fmt(e, f),
       Error::IO(e) => std::fmt::Display::fmt(e, f),
+      Error::PathNotFound(e) => std::fmt::Display::fmt(e, f),
     }
   }
 }

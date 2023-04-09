@@ -1,45 +1,50 @@
+use crate::cli::Output;
+use crate::error::{Error, Result};
+
 use hocon::{Hocon, HoconLoader};
 use serde_json::{Map, Number, Value};
-
-use crate::error::Error;
+use std::path::Path;
 
 pub struct Converter;
 
 impl Converter {
-  pub fn process_string(hocon_string: &str, yaml: bool) -> Result<String, Error> {
+  pub(crate) fn process_string(hocon_string: &str, output: Output) -> Result<String> {
     let hocon = HoconLoader::new().load_str(hocon_string)?.hocon()?;
-    Converter::run(hocon, yaml)
+    Converter::run(hocon, output)
   }
 
-  pub fn process_file(path: &str, yaml: bool) -> Result<String, Error> {
-    let hocon = HoconLoader::new().load_file(path)?.hocon()?;
-    Converter::run(hocon, yaml)
+  pub(crate) fn process_file(path: &str, output: Output) -> Result<String> {
+    if Path::new(path).try_exists()? {
+      let hocon = HoconLoader::new().load_file(path)?.hocon()?;
+      Converter::run(hocon, output)
+    } else {
+      Err(Error::PathNotFound(format!("Path '{path}' does not exist.")))
+    }
   }
 
-  fn run(hocon: Hocon, yaml: bool) -> Result<String, Error> {
+  fn run(hocon: Hocon, output: Output) -> Result<String> {
     let json = Converter::hocon_to_raw_json(hocon)?;
 
-    let output = if yaml {
-      serde_yaml::to_string(&json)?
-    } else {
-      serde_json::to_string_pretty(&json)?
+    let output = match output {
+      Output::Yaml => serde_yaml::to_string(&json)?,
+      Output::Json => serde_json::to_string_pretty(&json)?,
     };
 
     Ok(output)
   }
 
-  fn hocon_to_raw_json(hocon: Hocon) -> Result<Value, Error> {
+  fn hocon_to_raw_json(hocon: Hocon) -> Result<Value> {
     match hocon {
       Hocon::Boolean(b) => Ok(Value::Bool(b)),
       Hocon::Integer(i) => Ok(Value::Number(Number::from(i))),
       Hocon::Real(f) => Ok(Value::Number(Number::from_f64(f).unwrap())), // safe in this place, as we know that f is of type f64
       Hocon::String(s) => Ok(Value::String(s)),
       Hocon::Array(vec) => {
-        let json_array: Result<Vec<Value>, Error> = vec.into_iter().map(Converter::hocon_to_raw_json).collect();
+        let json_array: Result<Vec<Value>> = vec.into_iter().map(Converter::hocon_to_raw_json).collect();
         Ok(Value::Array(json_array?))
       }
       Hocon::Hash(map) => {
-        let json_object: Result<Map<String, Value>, Error> = map
+        let json_object: Result<Map<String, Value>> = map
           .into_iter()
           .map(|(k, v)| Ok((k, Converter::hocon_to_raw_json(v)?)))
           .collect();

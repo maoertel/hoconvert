@@ -11,7 +11,7 @@ for this.
 ## Usage
 
 ```bash
-hoconvert [input | --file <path>] [--yaml]
+hoconvert [input | --file <path>] [--output (yaml|json)]
 ```
 
 Either provide the hocon as first argument:
@@ -34,10 +34,10 @@ which leads to the following output:
 }
 ```
 
-You can also read the hocon from file:
+You can also read the hocon from a file by providing the path:
 
 ```bash
-hoconvert --file config.hocon
+hoconvert -f config.hocon
 ```
 
 Here is an example of a real-life Kubernetes problem as stated above:
