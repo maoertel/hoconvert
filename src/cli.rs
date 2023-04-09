@@ -9,7 +9,7 @@ pub(crate) enum Output {
 
 /// Converts a hocon into JSON (default) or YAML.
 #[derive(Parser)]
-#[clap(version = "0.1.3", author = "Mathias Oertel <mathias.oertel@pm.me>")]
+#[clap(version = "1.0.0", author = "Mathias Oertel <mathias.oertel@pm.me>")]
 pub(crate) struct Cli {
   /// Has to be a valid HOCON representation. Provided either as first argument or from stdin.
   #[clap(conflicts_with = "file")]
