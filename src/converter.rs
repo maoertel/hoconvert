@@ -3,6 +3,7 @@ use crate::error::{Error, Result};
 
 use hocon::{Hocon, HoconLoader};
 use serde_json::{Map, Number, Value};
+use std::path::Path;
 
 pub struct Converter;
 
@@ -13,8 +14,12 @@ impl Converter {
   }
 
   pub(crate) fn process_file(path: &str, output: Output) -> Result<String> {
-    let hocon = HoconLoader::new().load_file(path)?.hocon()?;
-    Converter::run(hocon, output)
+    if Path::new(path).try_exists()? {
+      let hocon = HoconLoader::new().load_file(path)?.hocon()?;
+      Converter::run(hocon, output)
+    } else {
+      Err(Error::PathNotFound(format!("Path '{path}' does not exist.")))
+    }
   }
 
   fn run(hocon: Hocon, output: Output) -> Result<String> {

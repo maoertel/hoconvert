@@ -9,6 +9,7 @@ pub enum Error {
   Json(serde_json::Error),
   Yaml(serde_yaml::Error),
   IO(std::io::Error),
+  PathNotFound(String),
 }
 
 impl std::error::Error for Error {}
@@ -20,6 +21,7 @@ impl fmt::Display for Error {
       Error::Json(e) => std::fmt::Display::fmt(e, f),
       Error::Yaml(e) => std::fmt::Display::fmt(e, f),
       Error::IO(e) => std::fmt::Display::fmt(e, f),
+      Error::PathNotFound(e) => std::fmt::Display::fmt(e, f),
     }
   }
 }

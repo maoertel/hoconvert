@@ -15,7 +15,7 @@ pub(crate) struct Cli {
   #[clap(conflicts_with = "file")]
   pub(crate) string: Option<String>,
 
-  /// File path to load the hocon for.
+  /// File path to load the hocon from.
   #[clap(long, short, conflicts_with = "string")]
   pub(crate) file: Option<String>,
 
