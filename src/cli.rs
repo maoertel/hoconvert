@@ -5,9 +5,10 @@ use clap::Parser;
 pub(crate) enum Output {
   Yaml,
   Json,
+  Toml,
 }
 
-/// Converts a hocon into JSON (default) or YAML.
+/// Converts a hocon into JSON (default), YAML, or TOML.
 #[derive(Parser)]
 #[clap(version = "1.0.0", author = "Mathias Oertel <mathias.oertel@pm.me>")]
 pub(crate) struct Cli {

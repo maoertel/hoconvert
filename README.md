@@ -1,6 +1,6 @@
 # {hocon:vert}
 
-CLI Tool to convert `HOCON` into valid `JSON` or `YAML`.
+CLI Tool to convert `HOCON` into valid `JSON`, `YAML`, or `TOML`.
 
 Under normal circumstances this is mostly not needed because hocon configs are parsed 
 within the application – case closed. But for example in conjunction with Kubernetes 
@@ -11,7 +11,7 @@ for this.
 ## Usage
 
 ```bash
-hoconvert [input | --file <path>] [--output (yaml|json)]
+hoconvert [input | --file <path>] [--output (json|yaml|toml)]
 ```
 
 Either provide the hocon as first argument:

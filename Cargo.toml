@@ -3,9 +3,9 @@ name = "hoconvert"
 version = "1.0.0"
 authors = ["Mathias Oertel <mathias.oertel@pm.me>"]
 edition = "2021"
-description = "CLI tool to convert HOCON into valid JSON or YAML."
+description = "CLI tool to convert HOCON into valid JSON, YAML, or TOML."
 readme = "README.md"
-keywords = ["cli", "hocon", "json", "yaml", "converter"]
+keywords = ["cli", "hocon", "json", "yaml", "toml", "converter"]
 categories = ["command-line-utilities"]
 license = "MIT"
 repository = "https://github.com/maoertel/hoconvert"
@@ -18,8 +18,10 @@ hocon = { git = "https://github.com/maoertel/hocon.rs", tag = "v0.10.0" }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 serde_yml = "0.0.12"
+toml = "0.8"
 
 [dev-dependencies]
 predicates = "3.1"
 assert_cmd = "2.1"
 serde_yml = "0.0.12"
+toml = "0.8"
