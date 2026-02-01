@@ -33,11 +33,7 @@ fn given_simple_key_value_when_convert_then_simple_toml() {
 #[test]
 fn given_a_hocon_object_when_convert_then_reflected_in_toml() {
   let mut cmd = cargo_bin_cmd!("hoconvert");
-  let command = cmd
-    .arg("{ foo = { key = bar } }")
-    .arg("--output")
-    .arg("toml")
-    .assert();
+  let command = cmd.arg("{ foo = { key = bar } }").arg("--output").arg("toml").assert();
 
   let test_toml = r#"
         [foo]
