@@ -3,41 +3,46 @@ use crate::error::{Error, Result};
 
 use hocon::{Hocon, HoconLoader};
 use serde_json::{Map, Number, Value};
-use std::path::Path;
+use std::io::Write;
 
 pub struct Converter;
 
 impl Converter {
-  pub(crate) fn process_string(hocon_string: &str, output: Output) -> Result<String> {
+  pub(crate) fn process_string<W: Write>(hocon_string: &str, output: Output, writer: W) -> Result<()> {
     let hocon = HoconLoader::new().load_str(hocon_string)?.hocon()?;
-    Converter::run(hocon, output)
+    Converter::run(hocon, output, writer)
   }
 
-  pub(crate) fn process_file(path: &str, output: Output) -> Result<String> {
-    if Path::new(path).try_exists()? {
-      let hocon = HoconLoader::new().load_file(path)?.hocon()?;
-      Converter::run(hocon, output)
-    } else {
-      Err(Error::PathNotFound(format!("Path '{path}' does not exist.")))
-    }
+  pub(crate) fn process_file<W: Write>(path: &str, output: Output, writer: W) -> Result<()> {
+    let hocon = HoconLoader::new()
+      .load_file(path)
+      .map_err(|e| match e {
+        hocon::Error::Include { path } => Error::PathNotFound(format!("Path '{path}' does not exist.")),
+        other => Error::from(other),
+      })?
+      .hocon()?;
+    Converter::run(hocon, output, writer)
   }
 
-  fn run(hocon: Hocon, output: Output) -> Result<String> {
+  fn run<W: Write>(hocon: Hocon, output: Output, writer: W) -> Result<()> {
     let json = Converter::hocon_to_raw_json(hocon)?;
 
-    let output = match output {
-      Output::Yaml => serde_yml::to_string(&json)?,
-      Output::Json => serde_json::to_string_pretty(&json)?,
+    match output {
+      Output::Yaml => serde_yml::to_writer(writer, &json)?,
+      Output::Json => serde_json::to_writer_pretty(writer, &json)?,
     };
 
-    Ok(output)
+    Ok(())
   }
 
   fn hocon_to_raw_json(hocon: Hocon) -> Result<Value> {
     match hocon {
       Hocon::Boolean(b) => Ok(Value::Bool(b)),
       Hocon::Integer(i) => Ok(Value::Number(Number::from(i))),
-      Hocon::Real(f) => Ok(Value::Number(Number::from_f64(f).unwrap())), // safe in this place, as we know that f is of type f64
+      Hocon::Real(f) => {
+        // Handle NaN and Infinity which can't be represented in JSON
+        Number::from_f64(f).map(Value::Number).ok_or(Error::InvalidFloat(f))
+      }
       Hocon::String(s) => Ok(Value::String(s)),
       Hocon::Array(vec) => {
         let json_array: Result<Vec<Value>> = vec.into_iter().map(Converter::hocon_to_raw_json).collect();
@@ -59,6 +64,7 @@ impl Converter {
 
 #[cfg(test)]
 mod tests {
+  use crate::cli::Output;
   use crate::converter::Converter;
   use hocon::HoconLoader;
 
@@ -116,5 +122,14 @@ mod tests {
     let parse_error = HoconLoader::new().load_str(hocon).expect_err("This should fail");
 
     assert_eq!(parse_error, hocon::Error::Parse)
+  }
+
+  #[test]
+  fn streaming_output_works() {
+    let mut output = Vec::new();
+    Converter::process_string(r#"foo = bar"#, Output::Json, &mut output).unwrap();
+    let result = String::from_utf8(output).unwrap();
+    assert!(result.contains("\"foo\""));
+    assert!(result.contains("\"bar\""));
   }
 }

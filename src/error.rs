@@ -10,6 +10,7 @@ pub enum Error {
   Yaml(serde_yml::Error),
   IO(std::io::Error),
   PathNotFound(String),
+  InvalidFloat(f64),
 }
 
 impl std::error::Error for Error {}
@@ -22,6 +23,10 @@ impl fmt::Display for Error {
       Error::Yaml(e) => std::fmt::Display::fmt(e, f),
       Error::IO(e) => std::fmt::Display::fmt(e, f),
       Error::PathNotFound(e) => std::fmt::Display::fmt(e, f),
+      Error::InvalidFloat(val) => write!(
+        f,
+        "Invalid float value: {val} (NaN or Infinity cannot be represented in JSON)"
+      ),
     }
   }
 }
