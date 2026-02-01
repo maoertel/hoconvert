@@ -2,7 +2,7 @@ use std::str;
 
 use assert_cmd::Command;
 use predicates::prelude::*;
-use serde_yaml::Value;
+use serde_yml::Value;
 
 #[test]
 fn given_empty_hocon_when_convert_then_empty_yaml() {
@@ -30,11 +30,11 @@ fn given_simple_key_value_when_convert_then_simple_yaml_object() {
   let command = cmd.arg("foo = bar").arg("--output").arg("yaml").assert();
 
   let expected_yaml = r#"foo: "bar""#;
-  let expected_yaml: Value = serde_yaml::from_str(expected_yaml).unwrap();
+  let expected_yaml: Value = serde_yml::from_str(expected_yaml).unwrap();
 
   let assert = command.success();
   let parsed_yaml = str::from_utf8(&assert.get_output().stdout).unwrap();
-  let parsed_yaml: Value = serde_yaml::from_str(parsed_yaml).unwrap();
+  let parsed_yaml: Value = serde_yml::from_str(parsed_yaml).unwrap();
 
   assert_eq!(parsed_yaml, expected_yaml)
 }
@@ -48,11 +48,11 @@ fn given_a_hocon_object_when_convert_then_reflected_in_yaml_object() {
         foo: 
           key: "bar"
         "#;
-  let test_yaml: Value = serde_yaml::from_str(test_yaml).unwrap();
+  let test_yaml: Value = serde_yml::from_str(test_yaml).unwrap();
 
   let assert = command.success();
   let parsed_yaml = str::from_utf8(&assert.get_output().stdout).unwrap();
-  let parsed_yaml: Value = serde_yaml::from_str(parsed_yaml).unwrap();
+  let parsed_yaml: Value = serde_yml::from_str(parsed_yaml).unwrap();
 
   assert_eq!(parsed_yaml, test_yaml)
 }
@@ -71,11 +71,11 @@ fn given_a_nested_hocon_object_when_convert_then_reflected_in_yaml_object() {
           nested:
             key: "bar"
         "#;
-  let test_yaml: Value = serde_yaml::from_str(test_yaml).unwrap();
+  let test_yaml: Value = serde_yml::from_str(test_yaml).unwrap();
 
   let assert = command.success();
   let parsed_yaml = str::from_utf8(&assert.get_output().stdout).unwrap();
-  let parsed_yaml: Value = serde_yaml::from_str(parsed_yaml).unwrap();
+  let parsed_yaml: Value = serde_yml::from_str(parsed_yaml).unwrap();
 
   assert_eq!(parsed_yaml, test_yaml)
 }

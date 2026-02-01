@@ -26,7 +26,7 @@ impl Converter {
     let json = Converter::hocon_to_raw_json(hocon)?;
 
     let output = match output {
-      Output::Yaml => serde_yaml::to_string(&json)?,
+      Output::Yaml => serde_yml::to_string(&json)?,
       Output::Json => serde_json::to_string_pretty(&json)?,
     };
 
