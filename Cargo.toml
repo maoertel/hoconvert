@@ -2,7 +2,7 @@
 name = "hoconvert"
 version = "1.0.0"
 authors = ["Mathias Oertel <mathias.oertel@pm.me>"]
-edition = "2021"
+edition = "2024"
 description = "CLI tool to convert HOCON into valid JSON, YAML, or TOML."
 readme = "README.md"
 keywords = ["cli", "hocon", "json", "yaml", "toml", "converter"]
