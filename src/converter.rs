@@ -24,12 +24,16 @@ impl Converter {
     Converter::run(hocon, output, writer)
   }
 
-  fn run<W: Write>(hocon: Hocon, output: Output, writer: W) -> Result<()> {
+  fn run<W: Write>(hocon: Hocon, output: Output, mut writer: W) -> Result<()> {
     let json = Converter::hocon_to_raw_json(hocon)?;
 
     match output {
       Output::Yaml => serde_yml::to_writer(writer, &json)?,
       Output::Json => serde_json::to_writer_pretty(writer, &json)?,
+      Output::Toml => {
+        let toml_str = toml::to_string_pretty(&json)?;
+        writer.write_all(toml_str.as_bytes())?;
+      }
     };
 
     Ok(())
@@ -131,5 +135,14 @@ mod tests {
     let result = String::from_utf8(output).unwrap();
     assert!(result.contains("\"foo\""));
     assert!(result.contains("\"bar\""));
+  }
+
+  #[test]
+  fn toml_output_works() {
+    let mut output = Vec::new();
+    Converter::process_string(r#"foo = bar"#, Output::Toml, &mut output).unwrap();
+    let result = String::from_utf8(output).unwrap();
+    assert!(result.contains("foo"));
+    assert!(result.contains("bar"));
   }
 }

@@ -8,6 +8,7 @@ pub enum Error {
   Hocon(hocon::Error),
   Json(serde_json::Error),
   Yaml(serde_yml::Error),
+  Toml(toml::ser::Error),
   IO(std::io::Error),
   PathNotFound(String),
   InvalidFloat(f64),
@@ -21,11 +22,12 @@ impl fmt::Display for Error {
       Error::Hocon(e) => std::fmt::Display::fmt(e, f),
       Error::Json(e) => std::fmt::Display::fmt(e, f),
       Error::Yaml(e) => std::fmt::Display::fmt(e, f),
+      Error::Toml(e) => std::fmt::Display::fmt(e, f),
       Error::IO(e) => std::fmt::Display::fmt(e, f),
       Error::PathNotFound(e) => std::fmt::Display::fmt(e, f),
       Error::InvalidFloat(val) => write!(
         f,
-        "Invalid float value: {val} (NaN or Infinity cannot be represented in JSON)"
+        "Invalid float value: {val} (NaN or Infinity cannot be represented in JSON/TOML)"
       ),
     }
   }
@@ -46,6 +48,12 @@ impl From<serde_json::Error> for Error {
 impl From<serde_yml::Error> for Error {
   fn from(yaml_error: serde_yml::Error) -> Self {
     Error::Yaml(yaml_error)
+  }
+}
+
+impl From<toml::ser::Error> for Error {
+  fn from(toml_error: toml::ser::Error) -> Self {
+    Error::Toml(toml_error)
   }
 }
 
