@@ -7,7 +7,7 @@ pub type Result<T> = std::result::Result<T, Error>;
 pub enum Error {
   Hocon(hocon::Error),
   Json(serde_json::Error),
-  Yaml(serde_yaml::Error),
+  Yaml(serde_yml::Error),
   IO(std::io::Error),
   PathNotFound(String),
 }
@@ -38,8 +38,8 @@ impl From<serde_json::Error> for Error {
   }
 }
 
-impl From<serde_yaml::Error> for Error {
-  fn from(yaml_error: serde_yaml::Error) -> Self {
+impl From<serde_yml::Error> for Error {
+  fn from(yaml_error: serde_yml::Error) -> Self {
     Error::Yaml(yaml_error)
   }
 }
