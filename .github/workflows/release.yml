@@ -16,7 +16,7 @@ jobs:
       matrix:
         include:
           - target: x86_64-apple-darwin
-            os: macos-13
+            os: macos-latest
             archive: hoconvert-${{ github.ref_name }}-darwin-amd64.tar.gz
             sha_name: sha256_darwin_amd64
           - target: aarch64-apple-darwin
