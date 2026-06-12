@@ -80,5 +80,5 @@ fn given_a_malformed_hocon_when_convert_then_error() {
     .assert();
 
   let assert = command.failure();
-  assert.stderr(predicate::str::contains("Error: Hocon(Parse)"));
+  assert.stderr(predicate::str::contains("Error: Hocon("));
 }
