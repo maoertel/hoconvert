@@ -12,7 +12,6 @@ mod error;
 fn main() -> Result<()> {
   let Cli { string, file, output } = Cli::parse();
 
-  // Use buffered stdout for better performance
   let stdout = io::stdout();
   let mut writer = BufWriter::new(stdout.lock());
 
@@ -26,7 +25,7 @@ fn main() -> Result<()> {
     }
   }?;
 
-  // Ensure trailing newline for cleaner terminal output
+  // Trailing newline for cleaner terminal output
   writeln!(writer)?;
   writer.flush()?;
 

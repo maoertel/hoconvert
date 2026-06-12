@@ -20,7 +20,7 @@ pub(crate) struct Cli {
   #[clap(long, short, conflicts_with = "string")]
   pub(crate) file: Option<String>,
 
-  /// Option to speciy the output format.
+  /// Option to specify the output format.
   #[clap(value_enum)]
   #[clap(long, short, default_value = "json")]
   pub(crate) output: Output,
