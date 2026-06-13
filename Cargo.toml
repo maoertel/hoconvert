@@ -13,7 +13,7 @@ repository = "https://github.com/maoertel/hoconvert"
 [dependencies]
 clap = { version = "4.6", features = ["derive"] }
 
-hocon = { git = "https://github.com/maoertel/hocon.rs", tag = "v0.10.0" }
+hocon-rs = "0.1"
 
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
@@ -25,3 +25,8 @@ predicates = "3.1"
 assert_cmd = "2.2"
 serde_yml = "0.0.13"
 toml = "1.1"
+criterion = "0.8"
+
+[[bench]]
+name = "parse"
+harness = false

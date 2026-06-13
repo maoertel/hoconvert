@@ -5,13 +5,12 @@ pub type Result<T> = std::result::Result<T, Error>;
 
 #[derive(Debug)]
 pub enum Error {
-  Hocon(hocon::Error),
+  Hocon(hocon_rs::Error),
   Json(serde_json::Error),
   Yaml(serde_yml::Error),
   Toml(toml::ser::Error),
   IO(std::io::Error),
   PathNotFound(String),
-  InvalidFloat(f64),
 }
 
 impl std::error::Error for Error {}
@@ -25,16 +24,12 @@ impl fmt::Display for Error {
       Error::Toml(e) => std::fmt::Display::fmt(e, f),
       Error::IO(e) => std::fmt::Display::fmt(e, f),
       Error::PathNotFound(e) => std::fmt::Display::fmt(e, f),
-      Error::InvalidFloat(val) => write!(
-        f,
-        "Invalid float value: {val} (NaN or Infinity cannot be represented in JSON/TOML)"
-      ),
     }
   }
 }
 
-impl From<hocon::Error> for Error {
-  fn from(hocon_error: hocon::Error) -> Self {
+impl From<hocon_rs::Error> for Error {
+  fn from(hocon_error: hocon_rs::Error) -> Self {
     Error::Hocon(hocon_error)
   }
 }

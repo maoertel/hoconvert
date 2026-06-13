@@ -1,37 +1,30 @@
 use crate::cli::Output;
 use crate::error::{Error, Result};
 
-use hocon::{Hocon, HoconLoader};
-use serde_json::{Map, Number, Value};
+use hocon_rs::Config;
+use serde_json::Value;
+use std::io::ErrorKind;
 use std::io::Write;
 
 pub struct Converter;
 
 impl Converter {
   pub(crate) fn process_string<W: Write>(hocon_string: &str, output: Output, writer: W) -> Result<()> {
-    let hocon = HoconLoader::new().load_str(hocon_string)?.hocon()?;
-    Converter::run(hocon, output, writer)
+    let value = Config::parse_str::<Value>(hocon_string, None)?;
+    Converter::run(value, output, writer)
   }
 
   pub(crate) fn process_file<W: Write>(path: &str, output: Output, writer: W) -> Result<()> {
-    let hocon = HoconLoader::new()
-      .load_file(path)
-      .map_err(|e| match e {
-        hocon::Error::Include { path } => Error::PathNotFound(format!("Path '{path}' does not exist.")),
-        other => Error::from(other),
-      })?
-      .hocon()?;
-    Converter::run(hocon, output, writer)
+    let value = Config::parse_file::<Value>(path, None).map_err(|e| Converter::map_file_error(path, e))?;
+    Converter::run(value, output, writer)
   }
 
-  fn run<W: Write>(hocon: Hocon, output: Output, mut writer: W) -> Result<()> {
-    let json = Converter::hocon_to_raw_json(hocon)?;
-
+  fn run<W: Write>(value: Value, output: Output, mut writer: W) -> Result<()> {
     match output {
-      Output::Yaml => serde_yml::to_writer(writer, &json)?,
-      Output::Json => serde_json::to_writer_pretty(writer, &json)?,
+      Output::Yaml => serde_yml::to_writer(writer, &value)?,
+      Output::Json => serde_json::to_writer_pretty(writer, &value)?,
       Output::Toml => {
-        let toml_str = toml::to_string_pretty(&json)?;
+        let toml_str = toml::to_string_pretty(&value)?;
         writer.write_all(toml_str.as_bytes())?;
       }
     };
@@ -39,30 +32,15 @@ impl Converter {
     Ok(())
   }
 
-  fn hocon_to_raw_json(hocon: Hocon) -> Result<Value> {
-    match hocon {
-      Hocon::Boolean(b) => Ok(Value::Bool(b)),
-      Hocon::Integer(i) => Ok(Value::Number(Number::from(i))),
-      Hocon::Real(f) => {
-        // Handle NaN and Infinity which can't be represented in JSON
-        Number::from_f64(f).map(Value::Number).ok_or(Error::InvalidFloat(f))
-      }
-      Hocon::String(s) => Ok(Value::String(s)),
-      Hocon::Array(vec) => {
-        let json_array: Result<Vec<Value>> = vec.into_iter().map(Converter::hocon_to_raw_json).collect();
-        Ok(Value::Array(json_array?))
-      }
-      Hocon::Hash(map) => {
-        let json_object: Result<Map<String, Value>> = map
-          .into_iter()
-          .map(|(k, v)| Ok((k, Converter::hocon_to_raw_json(v)?)))
-          .collect();
-
-        Ok(Value::Object(json_object?))
-      }
-      Hocon::Null => Ok(Value::Null),
-      Hocon::BadValue(bad_value) => Err(Error::from(bad_value)),
+  /// Map a missing top-level file to a friendly message; pass other errors through.
+  fn map_file_error(path: &str, error: hocon_rs::Error) -> Error {
+    if let hocon_rs::Error::Io(io_error) = &error
+      && io_error.kind() == ErrorKind::NotFound
+    {
+      return Error::PathNotFound(format!("Path '{path}' does not exist."));
     }
+
+    Error::from(error)
   }
 }
 
@@ -70,68 +48,70 @@ impl Converter {
 mod tests {
   use crate::cli::Output;
   use crate::converter::Converter;
-  use hocon::HoconLoader;
+
+  use serde_json::Value;
+  use serde_json::json;
+
+  fn to_value(input: &str) -> Value {
+    let mut output = Vec::new();
+    Converter::process_string(input, Output::Json, &mut output).unwrap();
+    serde_json::from_slice(&output).unwrap()
+  }
 
   #[test]
   fn empty_hocon_when_convert_empty_json() {
-    let hocon = "";
-    let hocon = HoconLoader::new().load_str(hocon).unwrap().hocon().unwrap();
-
-    let json = Converter::hocon_to_raw_json(hocon).unwrap();
-
-    let test_json = "{}";
-    let parsed_json = serde_json::to_string(&json).unwrap();
-    assert_eq!(test_json, parsed_json)
+    // Given an empty HOCON input
+    // When converting to JSON
+    // Then the result is an empty object
+    assert_eq!(to_value(""), json!({}));
   }
 
   #[test]
   fn simple_key_value_hocon_when_convert_reflected_in_json() {
-    let hocon = r#"foo = bar"#;
-    let hocon = HoconLoader::new().load_str(hocon).unwrap().hocon().unwrap();
-
-    let json = Converter::hocon_to_raw_json(hocon).unwrap();
-
-    let test_json = r#"{"foo":"bar"}"#;
-    let parsed_json = serde_json::to_string(&json).unwrap();
-    assert_eq!(test_json, parsed_json)
+    // Given a simple key/value HOCON
+    // When converting to JSON
+    // Then it reflects as a flat JSON object
+    assert_eq!(to_value(r#"foo = bar"#), json!({ "foo": "bar" }));
   }
 
   #[test]
   fn hocon_object_when_convert_reflected_in_json() {
-    let hocon = r#"{ foo = { key = bar } }"#;
-    let hocon = HoconLoader::new().load_str(hocon).unwrap().hocon().unwrap();
-
-    let json = Converter::hocon_to_raw_json(hocon).unwrap();
-
-    let test_json = r#"{"foo":{"key":"bar"}}"#;
-    let parsed_json = serde_json::to_string(&json).unwrap();
-    assert_eq!(test_json, parsed_json)
+    // Given a HOCON object
+    // When converting to JSON
+    // Then the nesting is preserved
+    assert_eq!(to_value(r#"{ foo = { key = bar } }"#), json!({ "foo": { "key": "bar" } }));
   }
 
   #[test]
   fn nested_hocon_object_when_convert_reflected_in_json() {
-    let hocon = r#"{ foo = { nested = { key = bar } } }"#;
-    let hocon = HoconLoader::new().load_str(hocon).unwrap().hocon().unwrap();
-
-    let json = Converter::hocon_to_raw_json(hocon).unwrap();
-
-    let test_json = r#"{"foo":{"nested":{"key":"bar"}}}"#;
-    let parsed_json = serde_json::to_string(&json).unwrap();
-    assert_eq!(test_json, parsed_json)
+    // Given a deeply nested HOCON object
+    // When converting to JSON
+    // Then the full nesting is preserved
+    assert_eq!(
+      to_value(r#"{ foo = { nested = { key = bar } } }"#),
+      json!({ "foo": { "nested": { "key": "bar" } } })
+    );
   }
 
   #[test]
   fn malformed_hocon_when_convert_returns_parse_error() {
-    let hocon = r#"{ foo = { nested = { key = bar"#;
-    let parse_error = HoconLoader::new().load_str(hocon).expect_err("This should fail");
+    // Given malformed HOCON
+    // When converting
+    // Then an error is returned
+    let mut output = Vec::new();
+    let result = Converter::process_string(r#"{ foo = { nested = { key = bar"#, Output::Json, &mut output);
 
-    assert_eq!(parse_error, hocon::Error::Parse)
+    assert!(result.is_err());
   }
 
   #[test]
   fn streaming_output_works() {
+    // Given a simple HOCON input
+    // When converting to JSON into a writer
+    // Then the streamed output contains the key and value
     let mut output = Vec::new();
     Converter::process_string(r#"foo = bar"#, Output::Json, &mut output).unwrap();
+
     let result = String::from_utf8(output).unwrap();
     assert!(result.contains("\"foo\""));
     assert!(result.contains("\"bar\""));
@@ -139,8 +119,12 @@ mod tests {
 
   #[test]
   fn toml_output_works() {
+    // Given a simple HOCON input
+    // When converting to TOML
+    // Then the output contains the key and value
     let mut output = Vec::new();
     Converter::process_string(r#"foo = bar"#, Output::Toml, &mut output).unwrap();
+
     let result = String::from_utf8(output).unwrap();
     assert!(result.contains("foo"));
     assert!(result.contains("bar"));
